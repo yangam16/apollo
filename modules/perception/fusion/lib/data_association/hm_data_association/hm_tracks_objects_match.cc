@@ -44,23 +44,38 @@ void extract_vector(const std::vector<T>& vec,
   }
 }
 
+//
+//
+//
+//
+//
+//
+// @brief: associate sensor measurements with global scene
 bool HMTrackersObjectsAssociation::Associate(
     const AssociationOptions& options, SensorFramePtr sensor_measurements,
     ScenePtr scene, AssociationResult* association_result) {
+  //
+  // 取前景识别结果objects
   const std::vector<SensorObjectPtr>& sensor_objects =
       sensor_measurements->GetForegroundObjects();
+  // 取前景识别对应的tracks
   const std::vector<TrackPtr>& fusion_tracks = scene->GetForegroundTracks();
   std::vector<std::vector<double>> association_mat;
 
+  // 融合tracks为空  或 传感器检测的目标为空，不需要匹配，返回true
   if (fusion_tracks.empty() || sensor_objects.empty()) {
     association_result->unassigned_tracks.resize(fusion_tracks.size());
     association_result->unassigned_measurements.resize(sensor_objects.size());
+
+    // todo: 看看unassigned_tracks，unassigned_measurements代表什么。
+    // std::iota，自加 （++）
     std::iota(association_result->unassigned_tracks.begin(),
               association_result->unassigned_tracks.end(), 0);
     std::iota(association_result->unassigned_measurements.begin(),
               association_result->unassigned_measurements.end(), 0);
     return true;
   }
+
   std::string measurement_sensor_id = sensor_objects[0]->GetSensorId();
   double measurement_timestamp = sensor_objects[0]->GetTimestamp();
   track_object_distance_.ResetProjectionCache(measurement_sensor_id,
@@ -141,6 +156,13 @@ bool HMTrackersObjectsAssociation::Associate(
 
   return state;
 }
+//
+//
+//
+//
+//
+//
+
 void HMTrackersObjectsAssociation::PostIdAssign(
     const std::vector<TrackPtr>& fusion_tracks,
     const std::vector<SensorObjectPtr>& sensor_objects,

@@ -31,6 +31,9 @@ namespace onboard {
 
 std::atomic<uint32_t> DetectionComponent::seq_num_{0};
 
+/*
+ * @brief
+ */
 bool DetectionComponent::Init() {
   LidarDetectionComponentConfig comp_config;
   if (!GetProtoConfig(&comp_config)) {
@@ -77,16 +80,16 @@ bool DetectionComponent::InitAlgorithmPlugin() {
                                                           &sensor_info_));
 
   lidar::BaseLidarObstacleDetection* detector =
-      lidar::BaseLidarObstacleDetectionRegisterer::
-      GetInstanceByName(detector_name_);
+      lidar::BaseLidarObstacleDetectionRegisterer::GetInstanceByName(
+          detector_name_);
   CHECK_NOTNULL(detector);
   detector_.reset(detector);
   lidar::LidarObstacleDetectionInitOptions init_options;
   init_options.sensor_name = sensor_name_;
   init_options.enable_hdmap_input =
       FLAGS_obs_enable_hdmap_input && enable_hdmap_;
-  ACHECK(detector_->Init(init_options)) <<
-                            "lidar obstacle detection init error";
+  ACHECK(detector_->Init(init_options))
+      << "lidar obstacle detection init error";
 
   lidar2world_trans_.Init(lidar2novatel_tf2_child_frame_id_);
   return true;

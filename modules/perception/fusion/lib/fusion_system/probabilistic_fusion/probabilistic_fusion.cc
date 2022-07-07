@@ -18,6 +18,8 @@
 #include <map>
 #include <utility>
 
+#include "modules/perception/proto/probabilistic_fusion_config.pb.h"
+
 #include "cyber/common/file.h"
 #include "modules/common/util/perf_util.h"
 #include "modules/common/util/string_util.h"
@@ -30,7 +32,6 @@
 #include "modules/perception/fusion/lib/data_fusion/type_fusion/dst_type_fusion/dst_type_fusion.h"
 #include "modules/perception/fusion/lib/gatekeeper/pbf_gatekeeper/pbf_gatekeeper.h"
 #include "modules/perception/lib/config_manager/config_manager.h"
-#include "modules/perception/proto/probabilistic_fusion_config.pb.h"
 
 namespace apollo {
 namespace perception {
@@ -46,6 +47,8 @@ bool ProbabilisticFusion::Init(const FusionInitOptions& init_options) {
   main_sensor_ = init_options.main_sensor;
 
   BaseInitOptions options;
+  // 读取 probabilistic_fusion.config 中 pt
+  // 配置文件的相对路径（root_dir）与名称（conf_file）
   if (!GetFusionInitOptions("ProbabilisticFusion", &options)) {
     return false;
   }
@@ -117,6 +120,7 @@ bool ProbabilisticFusion::Fuse(const FusionOptions& options,
   // 1. save frame data
   {
     std::lock_guard<std::mutex> data_lock(data_mutex_);
+    // 判断传感器类型
     if (!params_.use_lidar && sensor_data_manager->IsLidar(sensor_frame)) {
       return true;
     }
@@ -132,6 +136,7 @@ bool ProbabilisticFusion::Fuse(const FusionOptions& options,
     AINFO << "add sensor measurement: " << sensor_frame->sensor_info.name
           << ", obj_cnt : " << sensor_frame->objects.size() << ", "
           << FORMAT_TIMESTAMP(sensor_frame->timestamp);
+    // 保存数据
     sensor_data_manager->AddSensorMeasurements(sensor_frame);
 
     if (!is_publish_sensor) {
@@ -143,15 +148,18 @@ bool ProbabilisticFusion::Fuse(const FusionOptions& options,
   std::lock_guard<std::mutex> fuse_lock(fuse_mutex_);
   double fusion_time = sensor_frame->timestamp;
   std::vector<SensorFramePtr> frames;
+  // 提取用于融合的历史数据
   sensor_data_manager->GetLatestFrames(fusion_time, &frames);
   AINFO << "Get " << frames.size() << " related frames for fusion";
 
   // 3. perform fusion on related frames
   for (const auto& frame : frames) {
+    // 融合
     FuseFrame(frame);
   }
 
   // 4. collect fused objects
+  // 收集整理融合后目标
   CollectFusedObjects(fusion_time, fused_objects);
   return true;
 }
@@ -365,6 +373,7 @@ void ProbabilisticFusion::CollectFusedObjects(
   size_t fg_obj_num = 0;
   const std::vector<TrackPtr>& foreground_tracks =
       scenes_->GetForegroundTracks();
+
   for (size_t i = 0; i < foreground_tracks.size(); ++i) {
     if (gate_keeper_->AbleToPublish(foreground_tracks[i])) {
       this->CollectObjectsByTrack(timestamp, foreground_tracks[i],

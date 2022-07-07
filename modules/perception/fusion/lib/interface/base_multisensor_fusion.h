@@ -41,15 +41,18 @@ class BaseMultiSensorFusion {
   virtual bool Init(const ObstacleMultiSensorFusionParam& param) = 0;
 
   virtual bool Process(const base::FrameConstPtr& frame,
-               std::vector<base::ObjectPtr>* objects) = 0;
+                       std::vector<base::ObjectPtr>* objects) = 0;
 
   virtual std::string Name() const = 0;
 
  private:
+  //宏定义 DISALLOW_COPY_AND_ASSIGN 来禁止拷贝构造与拷贝赋值
   DISALLOW_COPY_AND_ASSIGN(BaseMultiSensorFusion);
 };  // Class BaseMultiSensorFusion
 
+// 生成 BaseMultiSensorFusion 的客户端代码
 PERCEPTION_REGISTER_REGISTERER(BaseMultiSensorFusion);
+// 生成 name 具体产品的具体工厂类
 #define PERCEPTION_REGISTER_MULTISENSORFUSION(name) \
   PERCEPTION_REGISTER_CLASS(BaseMultiSensorFusion, name)
 

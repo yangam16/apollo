@@ -39,6 +39,7 @@ class Track {
   Track& operator=(const Track&) = delete;
 
   // static members initialization
+  //设置 最长丢失时间，camera = 0.75s, radar = 0.5s, lidar = 0.25s
   inline static void SetMaxLidarInvisiblePeriod(double period) {
     s_max_lidar_invisible_period_ = period;
   }
@@ -52,8 +53,11 @@ class Track {
   bool Initialize(SensorObjectPtr obj, bool is_background = false);
 
   void Reset();
-
+  // 根据sensor_id,返回track成员变量 camera/radar/lidar_objects_中的obj
   SensorObjectConstPtr GetSensorObject(const std::string& sensor_id) const;
+
+  // 下面三个函数都是调用GetLastestObject（camera/lidar/radar_id）,返回这个track实例下最新的
+  // camera，lidar 或者radar obj，实现方式通过时间戳判断
   SensorObjectConstPtr GetLatestLidarObject() const;
   SensorObjectConstPtr GetLatestRadarObject() const;
   SensorObjectConstPtr GetLatestCameraObject() const;
@@ -94,15 +98,18 @@ class Track {
   inline double GetToicProb() const { return toic_prob_; }
 
   inline void SetToicProb(double prob) { toic_prob_ = prob; }
+
   inline bool IsBackground() const { return is_background_; }
 
   inline bool IsAlive() const { return is_alive_; }
 
+  // 查询SensorObject对象的invisible_period_变量，如果不等于0返回false
   bool IsVisible(const std::string& sensor_id) const;
   bool IsLidarVisible() const;
   bool IsRadarVisible() const;
   bool IsCameraVisible() const;
 
+  // 返回s_track_idx_，然后++s_track_idx_
   static size_t GenerateNewTrackId();
 
   void UpdateWithSensorObject(const SensorObjectPtr& obj);

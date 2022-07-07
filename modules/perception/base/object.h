@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <boost/circular_buffer.hpp>
+
 #include "Eigen/Core"
 
 #include "modules/perception/base/object_supplement.h"
@@ -42,6 +43,7 @@ struct alignas(16) Object {
   int id = -1;
 
   // @brief convex hull of the object, required
+  // 凸包
   PointCloud<PointD> polygon;
 
   // oriented boundingbox information
@@ -55,6 +57,7 @@ struct alignas(16) Object {
   // @brief theta variance, required
   float theta_variance = 0.0f;
   // @brief center of the boundingbox (cx, cy, cz), required
+  // 位置信息
   Eigen::Vector3d center = Eigen::Vector3d(0, 0, 0);
   // @brief covariance matrix of the center uncertainty, required
   Eigen::Matrix3f center_uncertainty;
@@ -117,7 +120,7 @@ struct alignas(16) Object {
   FusionObjectSupplement fusion_supplement;
 
   // @debug feature to be used for semantic mapping
-//  std::shared_ptr<apollo::prediction::Feature> feature;
+  //  std::shared_ptr<apollo::prediction::Feature> feature;
 };
 
 using ObjectPtr = std::shared_ptr<Object>;

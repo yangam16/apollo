@@ -40,6 +40,11 @@ class HMTrackersObjectsAssociation : public BaseDataAssociation {
     return true;
   }
 
+  // @brief: associate sensor measurements with global scene
+  // @param [in]: options
+  // @param [in]: sensor_measurements
+  // @param [in]: scene
+  // @param [out]: association_result
   bool Associate(const AssociationOptions& options,
                  SensorFramePtr sensor_measurements, ScenePtr scene,
                  AssociationResult* association_result) override;

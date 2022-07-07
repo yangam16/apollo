@@ -47,6 +47,7 @@ class Scene {
     return background_tracks_;
   }
 
+  // 两个Add函数就是往两个vector里面push track
   void AddForegroundTrack(TrackPtr track);
   void AddBackgroundTrack(TrackPtr track);
 

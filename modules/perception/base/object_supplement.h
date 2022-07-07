@@ -75,14 +75,14 @@ typedef std::shared_ptr<LidarObjectSupplement> LidarObjectSupplementPtr;
 typedef std::shared_ptr<const LidarObjectSupplement>
     LidarObjectSupplementConstPtr;
 
-struct alignas(16) RadarObjectSupplement {
+struct alignas(16) RadarObjectSupplement {  // 内存对其类型
   void Reset() {
     on_use = false;
     range = 0.0f;
     angle = 0.0f;
-    relative_radial_velocity = 0.0f;
-    relative_tangential_velocity = 0.0f;
-    radial_velocity = 0.0f;
+    relative_radial_velocity = 0.0f;      // 相对径向速度
+    relative_tangential_velocity = 0.0f;  // 相对切向速度
+    radial_velocity = 0.0f;               // 径向速度
   }
   // @brief valid only for on_use = true
   bool on_use = false;

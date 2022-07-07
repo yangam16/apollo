@@ -29,6 +29,7 @@ uint32_t FusionComponent::s_seq_num_ = 0;
 std::mutex FusionComponent::s_mutex_;
 
 bool FusionComponent::Init() {
+  // 获取参数
   FusionComponentConfig comp_config;
   if (!GetProtoConfig(&comp_config)) {
     return false;
@@ -51,6 +52,7 @@ bool FusionComponent::Init() {
   return true;
 }
 
+// 核心方法
 bool FusionComponent::Proc(const std::shared_ptr<SensorFrameMessage>& message) {
   if (message->process_stage_ == ProcessStage::SENSOR_FUSION) {
     return true;
@@ -59,6 +61,7 @@ bool FusionComponent::Proc(const std::shared_ptr<SensorFrameMessage>& message) {
                                                        PerceptionObstacles);
   std::shared_ptr<SensorFrameMessage> viz_message(new (std::nothrow)
                                                       SensorFrameMessage);
+  //处理方法，输入传感器信息，将结果存入out_message，viz_message。
   bool status = InternalProc(message, out_message, viz_message);
   if (status) {
     // TODO(conver sensor id)
@@ -80,18 +83,24 @@ bool FusionComponent::Proc(const std::shared_ptr<SensorFrameMessage>& message) {
 }
 
 bool FusionComponent::InitAlgorithmPlugin() {
+  // 通过工厂方法模式获取 ObstacleMultiSensorFusion 类的实例指针
   fusion::BaseMultiSensorFusion* fusion =
-    fusion::BaseMultiSensorFusionRegisterer::GetInstanceByName(fusion_name_);
+      fusion::BaseMultiSensorFusionRegisterer::GetInstanceByName(fusion_name_);
   CHECK_NOTNULL(fusion);
+
+  // 更新 fusion_ 的指针值为 ObstacleMultiSensorFusion 类实例指针
   fusion_.reset(fusion);
+
   fusion::ObstacleMultiSensorFusionParam param;
   param.main_sensor = fusion_main_sensor_;
   param.fusion_method = fusion_method_;
+  // 多态调用 ObstacleMultiSensorFusion::Init，实际完成了概率融合方法的初始化
   ACHECK(fusion_->Init(param)) << "Failed to init ObstacleMultiSensorFusion";
 
   if (FLAGS_obs_enable_hdmap_input && object_in_roi_check_) {
+    // 获取 map::HDMapInput 的唯一实例，这是一个单例类
     hdmap_input_ = map::HDMapInput::Instance();
-    ACHECK(hdmap_input_->Init()) << "Failed to init hdmap input.";
+    ACHECK(hdmap_input_->Init()) << "Failed to init hdmap input.";  // 初始化
   }
   AINFO << "Init algorithm successfully, onboard fusion: " << fusion_method_;
   return true;
@@ -128,6 +137,7 @@ bool FusionComponent::InternalProc(
   frame->timestamp = in_message->timestamp_;
 
   std::vector<base::ObjectPtr> fused_objects;
+  // 核心功能方法
   if (!fusion_->Process(frame, &fused_objects)) {
     AERROR << "Failed to call fusion plugin.";
     return false;

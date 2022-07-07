@@ -25,12 +25,15 @@ bool ObstacleMultiSensorFusion::Init(
     AINFO << "Already inited";
     return true;
   }
+  // 获取 ProbabilisticFusion 类的实例指针
   BaseFusionSystem* fusion =
-          BaseFusionSystemRegisterer::GetInstanceByName(param.fusion_method);
+      BaseFusionSystemRegisterer::GetInstanceByName(param.fusion_method);
   fusion_.reset(fusion);
 
   FusionInitOptions init_options;
   init_options.main_sensor = param.main_sensor;
+
+  // 多态调用 ProbabilisticFusion::Init 方法
   if (fusion_ == nullptr || !fusion_->Init(init_options)) {
     AINFO << "Failed to Get Instance or Initialize " << param.fusion_method;
     return false;
